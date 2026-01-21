@@ -1,0 +1,101 @@
+{
+  "@@locale": "en",
+  "appName": "SoulNote",
+  "appSubtitle": "LOCAL NOTES",
+  "searchHint": "Search notes...",
+  "notes": "Notes",
+  "search": "Search",
+  "settings": "Settings",
+  "createNote": "Create Note",
+  "newNote": "New Note",
+  "enterNoteTitle": "Enter note title...",
+  "cancel": "Cancel",
+  "create": "Create",
+  "delete": "Delete",
+  "deleteNote": "Delete Note",
+  "deleteNoteConfirm": "Are you sure you want to delete \"{title}\"?\\nThis will also delete all related messages.",
+  "@deleteNoteConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "noNotes": "No notes yet",
+  "createFirstNote": "Tap the button below to create your first note",
+  "p2pActive": "P2P Active",
+  "messageInput": "Type a message...",
+  "startRecording": "Start recording",
+  "selectImage": "Select Image",
+  "selectVideo": "Select Video",
+  "notesCount": "Notes ({count})",
+  "@notesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messagesCount": "Messages ({count})",
+  "@messagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noSearchResults": "No matching results found",
+  "yesterday": "Yesterday",
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "image": "Image",
+  "video": "Video",
+  "deviceIdentity": "Device Identity",
+  "deviceIdentityDesc": "Visible to nearby P2P devices",
+  "storageManagement": "Storage Management",
+  "storageSize": "Local database: {size}",
+  "@storageSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "autoSync": "Auto-Sync Preferences",
+  "autoSyncDesc": "Bluetooth auto-discovery for local sync",
+  "deleteAllData": "Delete All Local Data",
+  "privacyMessage": "Your data never leaves your local network. No cloud, no tracking.",
+  "syncRadar": "Sync Radar",
+  "noCloud": "No Cloud — P2P Bluetooth Only",
+  "searchingDevices": "Searching for nearby devices...",
+  "stayClose": "Stay within 10 meters for best results",
+  "syncNow": "Sync Now",
+  "encryptionMessage": "YOUR NOTES NEVER LEAVE YOUR LOCAL NETWORK.\\nDATA IS ENCRYPTED END-TO-END.",
+  "language": "Language",
+  "languageSettings": "Language Settings",
+  "selectLanguage": "Select your preferred language",
+  "languageChinese": "简体中文",
+  "languageEnglish": "English",
+  "languageSystem": "Follow System",
+  "deleteAllDataTitle": "Delete All Data?",
+  "deleteAllDataMessage": "This will permanently delete all your local notes and settings. This action cannot be undone.\n\nNote: This deletion only removes local cache. Other devices are not affected and data can be restored through synchronization.",
+  "deleteSuccess": "All data deleted successfully",
+  "edit": "Edit",
+  "editNote": "Edit Note",
+  "editNoteTitle": "Edit Note Title",
+  "save": "Save",
+  "preview": "Preview",
+  "importMarkdown": "Import Markdown",
+  "exportMarkdown": "Export Markdown",
+  "exportSuccess": "Exported successfully",
+  "chatNotes": "Chat Notes",
+  "markdownNotes": "Markdown Notes",
+  "createChatNote": "Create Chat Note",
+  "createMarkdownNote": "Create Markdown Note"
+}
