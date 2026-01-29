@@ -5,6 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:crypto/crypto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soul_note/models/note.dart';
 import 'package:soul_note/models/message.dart';
 import 'package:soul_note/services/database_service.dart';
@@ -61,6 +62,10 @@ class BluetoothSyncService {
   // 服务 UUID（自定义，所有设备需使用相同的 UUID）
   static const String SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
   static const String CHARACTERISTIC_UUID = '4fafc202-1fb5-459e-8fcc-c5c9c331914b';
+  
+  // 应用标识符 - 用于识别运行 SoulNote 的设备
+  static const String APP_ID = 'com.soulnote.app';
+  static const String DEVICE_NAME_PREFIX = 'SoulNote'; // 设备名称前缀
 
   String? _deviceId;
   String? _deviceName;
@@ -77,11 +82,16 @@ class BluetoothSyncService {
 
   List<ConnectedDevice> _connectedDevices = [];
   SyncStatus _currentStatus = SyncStatus.idle;
+  
+  // 可信任设备列表（已绑定的设备）
+  Set<String> _trustedDeviceIds = {};
+  static const String _trustedDevicesKey = 'trusted_device_ids';
 
   // 初始化服务
   Future<void> initialize() async {
     await _loadDeviceInfo();
     await _authenticateUser();
+    await _loadTrustedDevices();
   }
 
   // 加载设备信息
@@ -151,6 +161,52 @@ class BluetoothSyncService {
     return digest.toString();
   }
 
+  // 加载可信任设备列表
+  Future<void> _loadTrustedDevices() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final trustedIds = prefs.getStringList(_trustedDevicesKey) ?? [];
+      _trustedDeviceIds = trustedIds.toSet();
+      print('✅ 已加载 ${_trustedDeviceIds.length} 个可信任设备');
+    } catch (e) {
+      print('❌ 加载可信任设备失败: $e');
+      _trustedDeviceIds = {};
+    }
+  }
+
+  // 保存可信任设备列表
+  Future<void> _saveTrustedDevices() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_trustedDevicesKey, _trustedDeviceIds.toList());
+      print('✅ 已保存 ${_trustedDeviceIds.length} 个可信任设备');
+    } catch (e) {
+      print('❌ 保存可信任设备失败: $e');
+    }
+  }
+
+  // 添加可信任设备
+  Future<void> addTrustedDevice(String deviceId) async {
+    _trustedDeviceIds.add(deviceId);
+    await _saveTrustedDevices();
+  }
+
+  // 移除可信任设备
+  Future<void> removeTrustedDevice(String deviceId) async {
+    _trustedDeviceIds.remove(deviceId);
+    await _saveTrustedDevices();
+  }
+
+  // 检查设备是否是可信任的
+  bool isTrustedDevice(String deviceId) {
+    return _trustedDeviceIds.contains(deviceId);
+  }
+
+  // 获取所有可信任设备 ID 列表
+  Set<String> getTrustedDeviceIds() {
+    return Set.from(_trustedDeviceIds);
+  }
+
   // 开始扫描附近设备
   Future<void> startScanning() async {
     _updateStatus(SyncStatus.scanning);
@@ -159,26 +215,272 @@ class BluetoothSyncService {
 
     try {
       // 检查蓝牙是否可用
-      final adapterState = await FlutterBluePlus.adapterState.first;
-      if (adapterState != BluetoothAdapterState.on) {
-        print('Bluetooth is not on');
+      final isSupported = await FlutterBluePlus.isSupported;
+      if (!isSupported) {
+        print('❌ Bluetooth not supported on this device');
         _updateStatus(SyncStatus.error);
         return;
       }
 
-      // 开始扫描
+      final adapterState = await FlutterBluePlus.adapterState.first;
+      if (adapterState != BluetoothAdapterState.on) {
+        print('❌ Bluetooth is not enabled. Please turn on Bluetooth');
+        _updateStatus(SyncStatus.error);
+        return;
+      }
+
+      // 监听扫描结果
+      FlutterBluePlus.scanResults.listen((results) {
+        _processDiscoveredDevices(results);
+      });
+
+      // 开始扫描所有附近的蓝牙设备
+      print('🔍 开始扫描附近的蓝牙设备...');
       await FlutterBluePlus.startScan(
         timeout: const Duration(seconds: 10),
         androidUsesFineLocation: false,
       );
 
-      // 模拟发现设备（实际应通过蓝牙广播发现）
-      await Future.delayed(const Duration(seconds: 2));
-      _simulateDiscoveredDevices();
+      // 扫描超时后处理
+      await Future.delayed(const Duration(seconds: 10));
+      await FlutterBluePlus.stopScan();
+      
+      // 扫描完成
+      if (_connectedDevices.isEmpty) {
+        print('');
+        print('❌ 未发现 SoulNote 设备');
+        print('💡 提示：');
+        print('   1. 确保其他设备已安装并运行 SoulNote');
+        print('   2. 确保蓝牙已开启');
+        print('   3. 修改设备名称包含 "SoulNote"：');
+        print('      iOS: 设置 > 通用 > 关于本机 > 名称');
+        print('      macOS: 系统偏好设置 > 共享 > 电脑名称');
+        print('   例如：Corn的iPhone → Corn的iPhone (SoulNote)');
+        print('');
+        _updateStatus(SyncStatus.idle);
+      } else {
+        print('');
+        print('✅ 发现 ${_connectedDevices.length} 台 SoulNote 设备');
+        for (final device in _connectedDevices) {
+          print('   📱 ${device.name} (${_getDeviceTypeName(device.type)})');
+        }
+        print('');
+        _updateStatus(SyncStatus.idle);
+      }
 
     } catch (e) {
-      print('Scanning error: $e');
+      print('❌ Scanning error: $e');
       _updateStatus(SyncStatus.error);
+    }
+  }
+
+  // 处理发现的设备（用于同步，只显示已绑定的设备）
+  void _processDiscoveredDevices(List<ScanResult> results) {
+    print('📱 发现 ${results.length} 个蓝牙设备');
+    
+    final discoveredDevices = <ConnectedDevice>[];
+    final seenDevices = <String>{};
+    
+    for (final result in results) {
+      try {
+        final deviceId = result.device.remoteId.toString();
+        
+        // 避免重复添加
+        if (seenDevices.contains(deviceId)) continue;
+        seenDevices.add(deviceId);
+        
+        // ⭐ 只显示已绑定的设备
+        if (!isTrustedDevice(deviceId)) {
+          continue;
+        }
+        
+        // 获取设备名称
+        String deviceName = result.advertisementData.advName.isNotEmpty 
+            ? result.advertisementData.advName 
+            : result.device.platformName;
+            
+        // 如果没有名称，使用设备 ID 的前8位
+        if (deviceName.isEmpty) {
+          deviceName = 'Device ${deviceId.substring(0, 8)}';
+        }
+        
+        print('  ✅ 发现已绑定设备: $deviceName (RSSI: ${result.rssi})');
+        
+        // 判断设备类型（基于名称）
+        DeviceType type = DeviceType.iphone;
+        final lowerName = deviceName.toLowerCase();
+        if (lowerName.contains('ipad')) {
+          type = DeviceType.ipad;
+        } else if (lowerName.contains('mac') || lowerName.contains('macbook')) {
+          type = DeviceType.mac;
+        }
+
+        // 添加已绑定的设备
+        discoveredDevices.add(ConnectedDevice(
+          id: deviceId,
+          name: deviceName,
+          type: type,
+          lastSyncTime: DateTime.now().subtract(const Duration(minutes: 5)),
+          status: SyncStatus.idle,
+        ));
+      } catch (e) {
+        print('❌ 解析设备出错: $e');
+      }
+    }
+
+    if (discoveredDevices.isNotEmpty) {
+      print('✅ 可同步设备: ${discoveredDevices.length} 个');
+      _connectedDevices = discoveredDevices;
+      _devicesController.add(_connectedDevices);
+    } else {
+      print('💡 未发现已绑定的设备，请先在设置中绑定设备');
+    }
+  }
+  
+  // 检查是否是 SoulNote 设备
+  bool _checkIfSoulNoteDevice(ScanResult result, String deviceName) {
+    // 方法1：检查设备名称是否包含 SoulNote 标识
+    if (deviceName.contains(DEVICE_NAME_PREFIX)) {
+      return true;
+    }
+    
+    // 方法2：检查是否广播了我们的服务 UUID
+    final serviceUuids = result.advertisementData.serviceUuids;
+    if (serviceUuids.contains(SERVICE_UUID)) {
+      return true;
+    }
+    
+    // 方法3：检查 manufacturerData 中是否包含我们的 APP_ID
+    final manufacturerData = result.advertisementData.manufacturerData;
+    for (final data in manufacturerData.values) {
+      final dataString = String.fromCharCodes(data);
+      if (dataString.contains(APP_ID)) {
+        return true;
+      }
+    }
+    
+    // 方法4：检查是否是当前用户的其他设备（通过 userAuthHash）
+    // 这需要在连接后验证，这里先简化处理
+    
+    return false;
+  }
+  
+  // 获取设备类型名称
+  String _getDeviceTypeName(DeviceType type) {
+    switch (type) {
+      case DeviceType.iphone:
+        return 'iPhone';
+      case DeviceType.ipad:
+        return 'iPad';
+      case DeviceType.mac:
+        return 'Mac';
+    }
+  }
+
+  // 扫描所有附近设备（用于绑定页面，不过滤）
+  Future<void> startScanningForBinding() async {
+    _updateStatus(SyncStatus.scanning);
+    _connectedDevices.clear();
+    _devicesController.add(_connectedDevices);
+
+    try {
+      // 检查蓝牙是否可用
+      final isSupported = await FlutterBluePlus.isSupported;
+      if (!isSupported) {
+        print('❌ Bluetooth not supported on this device');
+        _updateStatus(SyncStatus.error);
+        return;
+      }
+
+      final adapterState = await FlutterBluePlus.adapterState.first;
+      if (adapterState != BluetoothAdapterState.on) {
+        print('❌ Bluetooth is not enabled. Please turn on Bluetooth');
+        _updateStatus(SyncStatus.error);
+        return;
+      }
+
+      // 监听扫描结果（不过滤）
+      FlutterBluePlus.scanResults.listen((results) {
+        _processDiscoveredDevicesForBinding(results);
+      });
+
+      // 开始扫描所有附近的蓝牙设备
+      print('🔍 开始扫描附近的所有蓝牙设备（用于绑定）...');
+      await FlutterBluePlus.startScan(
+        timeout: const Duration(seconds: 10),
+        androidUsesFineLocation: false,
+      );
+
+      // 扫描超时后处理
+      await Future.delayed(const Duration(seconds: 10));
+      await FlutterBluePlus.stopScan();
+      
+      // 扫描完成
+      print('✅ 扫描完成，发现 ${_connectedDevices.length} 台设备');
+      _updateStatus(SyncStatus.idle);
+
+    } catch (e) {
+      print('❌ Scanning error: $e');
+      _updateStatus(SyncStatus.error);
+    }
+  }
+
+  // 处理发现的设备（用于绑定页面，显示所有有名称的设备）
+  void _processDiscoveredDevicesForBinding(List<ScanResult> results) {
+    final discoveredDevices = <ConnectedDevice>[];
+    final seenDevices = <String>{};
+    
+    for (final result in results) {
+      try {
+        final deviceId = result.device.remoteId.toString();
+        
+        // 避免重复添加
+        if (seenDevices.contains(deviceId)) continue;
+        seenDevices.add(deviceId);
+        
+        // 获取设备名称
+        String deviceName = result.advertisementData.advName.isNotEmpty 
+            ? result.advertisementData.advName 
+            : result.device.platformName;
+            
+        // 只跳过完全没有名称的设备
+        if (deviceName.isEmpty) {
+          continue;
+        }
+        
+        // 过滤掉信号太弱的设备（RSSI < -90）
+        if (result.rssi < -90) {
+          continue;
+        }
+        
+        print('  📱 发现设备: $deviceName (RSSI: ${result.rssi})');
+        
+        // 判断设备类型（基于名称）
+        DeviceType type = DeviceType.iphone;
+        final lowerName = deviceName.toLowerCase();
+        if (lowerName.contains('ipad')) {
+          type = DeviceType.ipad;
+        } else if (lowerName.contains('mac') || lowerName.contains('macbook')) {
+          type = DeviceType.mac;
+        }
+
+        // 添加所有有名称的设备
+        discoveredDevices.add(ConnectedDevice(
+          id: deviceId,
+          name: deviceName,
+          type: type,
+          lastSyncTime: DateTime.now(),
+          status: SyncStatus.idle,
+        ));
+      } catch (e) {
+        print('❌ 解析设备出错: $e');
+      }
+    }
+
+    if (discoveredDevices.isNotEmpty) {
+      print('✅ 可绑定设备: ${discoveredDevices.length} 个');
+      _connectedDevices = discoveredDevices;
+      _devicesController.add(_connectedDevices);
     }
   }
 
@@ -190,28 +492,6 @@ class BluetoothSyncService {
     } catch (e) {
       print('Stop scanning error: $e');
     }
-  }
-
-  // 模拟发现的设备（演示用）
-  void _simulateDiscoveredDevices() {
-    _connectedDevices = [
-      ConnectedDevice(
-        id: 'mac-1',
-        name: 'MacBook Pro M2',
-        type: DeviceType.mac,
-        lastSyncTime: DateTime.now().subtract(const Duration(minutes: 5)),
-        status: SyncStatus.idle,
-      ),
-      ConnectedDevice(
-        id: 'ipad-1',
-        name: 'iPad Pro',
-        type: DeviceType.ipad,
-        lastSyncTime: DateTime.now().subtract(const Duration(hours: 2)),
-        status: SyncStatus.idle,
-      ),
-    ];
-    _devicesController.add(_connectedDevices);
-    _updateStatus(SyncStatus.idle);
   }
 
   // 与指定设备同步

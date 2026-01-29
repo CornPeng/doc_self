@@ -475,6 +475,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create Markdown Note'**
   String get createMarkdownNote;
+
+  /// No description provided for @bluetoothBinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Binding'**
+  String get bluetoothBinding;
+
+  /// No description provided for @bluetoothBindingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage paired devices for P2P sync'**
+  String get bluetoothBindingDesc;
+
+  /// No description provided for @boundDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'BOUND DEVICES'**
+  String get boundDevices;
+
+  /// No description provided for @availableDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'AVAILABLE DEVICES'**
+  String get availableDevices;
+
+  /// No description provided for @noBoundDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'No bound devices yet'**
+  String get noBoundDevices;
+
+  /// No description provided for @noDevicesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices found\nTap \"Search for Devices\" to scan'**
+  String get noDevicesFound;
+
+  /// No description provided for @scanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning...'**
+  String get scanning;
+
+  /// No description provided for @searchForDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for Devices'**
+  String get searchForDevices;
+
+  /// No description provided for @searching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching...'**
+  String get searching;
+
+  /// No description provided for @showMyQr.
+  ///
+  /// In en, this message translates to:
+  /// **'My QR Code'**
+  String get showMyQr;
+
+  /// No description provided for @scanQrToPair.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to Pair'**
+  String get scanQrToPair;
+
+  /// No description provided for @enterPairingPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Pairing Password'**
+  String get enterPairingPassword;
+
+  /// No description provided for @linkTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to \"{name}\"'**
+  String linkTo(String name);
+
+  /// No description provided for @link.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get link;
+
+  /// No description provided for @pairingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a device to initiate pairing. Ensure the other device is in discovery mode and has Bluetooth enabled for local P2P sync.'**
+  String get pairingHint;
+
+  /// No description provided for @pairedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully paired with {name}'**
+  String pairedSuccessfully(String name);
+
+  /// No description provided for @unboundFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbound from {name}'**
+  String unboundFrom(String name);
+
+  /// No description provided for @enterFourDigitPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a 4-digit password'**
+  String get enterFourDigitPassword;
 }
 
 class _AppLocalizationsDelegate

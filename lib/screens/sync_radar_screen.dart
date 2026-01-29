@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:soul_note/services/bluetooth_sync_service.dart';
+import 'package:soul_note/services/sync_service.dart';
 
 class SyncRadarScreen extends StatefulWidget {
   const SyncRadarScreen({super.key});
@@ -11,7 +11,7 @@ class SyncRadarScreen extends StatefulWidget {
 class _SyncRadarScreenState extends State<SyncRadarScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  final BluetoothSyncService _syncService = BluetoothSyncService();
+  final SyncService _syncService = SyncService();
   
   List<ConnectedDevice> _devices = [];
   SyncStatus _syncStatus = SyncStatus.idle;
@@ -85,24 +85,8 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 使用原始设备数据或模拟数据
-    final displayDevices = _devices.isNotEmpty ? _devices : [
-      ConnectedDevice(
-        id: 'mac-demo',
-        name: 'MacBook Pro M2',
-        type: DeviceType.mac,
-        lastSyncTime: DateTime.now(),
-        status: SyncStatus.idle,
-      ),
-      ConnectedDevice(
-        id: 'ipad-demo',
-        name: "Sarah's iPad Pro",
-        type: DeviceType.ipad,
-        lastSyncTime: DateTime.now().subtract(const Duration(hours: 1)),
-        status: SyncStatus.syncing,
-        progress: 0.85,
-      ),
-    ];
+    // 使用真实的蓝牙设备数据
+    final displayDevices = _devices;
 
     return Scaffold(
       backgroundColor: const Color(0xFF101922),
@@ -167,13 +151,17 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
                   },
                 ),
                 
-                // Central Device
+                // Central Device (Current Device)
                 Container(
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF137FEC),
+                    color: const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(40),
+                    border: Border.all(
+                      color: const Color(0xFF137FEC),
+                      width: 3,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF137FEC).withOpacity(0.4),
@@ -182,53 +170,17 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.smartphone,
+                  child: Icon(
+                    _syncService.deviceType != null 
+                        ? _getDeviceIcon(_syncService.deviceType!)
+                        : Icons.smartphone,
                     size: 36,
-                    color: Colors.white,
+                    color: const Color(0xFF137FEC),
                   ),
                 ),
                 
-                // MacBook Device
-                Positioned(
-                  top: 60,
-                  left: 40,
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_devices.isNotEmpty) {
-                        _syncService.syncWithDevice(displayDevices[0].id);
-                      }
-                    },
-                    child: _buildOrbitingDevice(
-                      icon: _getDeviceIcon(displayDevices[0].type),
-                      label: displayDevices[0].status == SyncStatus.syncing 
-                          ? 'Syncing ${((displayDevices[0].progress ?? 0) * 100).toInt()}%'
-                          : 'Connected',
-                      isConnected: true,
-                      isSyncing: false,
-                    ),
-                  ),
-                ),
-                
-                // iPad Device
-                if (displayDevices.length > 1)
-                  Positioned(
-                    bottom: 100,
-                    right: 30,
-                    child: GestureDetector(
-                      onTap: () {
-                        if (_devices.isNotEmpty && _devices.length > 1) {
-                          _syncService.syncWithDevice(displayDevices[1].id);
-                        }
-                      },
-                      child: _buildOrbitingDevice(
-                        icon: _getDeviceIcon(displayDevices[1].type),
-                        label: 'Syncing ${((displayDevices[1].progress ?? 0.85) * 100).toInt()}%',
-                        isConnected: false,
-                        isSyncing: true,
-                      ),
-                    ),
-                  ),
+                // 显示发现的设备（最多3个）
+                ..._buildOrbitingDevices(),
                 
                 // Scanning Status
                 Positioned(
@@ -242,7 +194,9 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
                             ? 'Searching for nearby devices...'
                             : _syncStatus == SyncStatus.syncing
                             ? 'Syncing data...'
-                            : 'Found ${displayDevices.length} devices',
+                            : displayDevices.isEmpty
+                            ? 'No devices found'
+                            : 'Found ${displayDevices.length} device${displayDevices.length > 1 ? 's' : ''}',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.8),
                           fontSize: 16,
@@ -265,58 +219,49 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
           ),
           
           // Devices List
-          Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C2632).withOpacity(0.7),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.1),
-                width: 1,
+          if (displayDevices.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.all(16),
+              constraints: const BoxConstraints(
+                maxHeight: 300, // 限制最大高度
               ),
-            ),
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (_devices.isNotEmpty) {
-                      _syncService.syncWithDevice(displayDevices[0].id);
-                    }
-                  },
-                  child: _buildDeviceListItem(
-                    icon: _getDeviceIcon(displayDevices[0].type),
-                    title: displayDevices[0].name,
-                    subtitle: 'Last synced: ${_getTimeAgo(displayDevices[0].lastSyncTime)}',
-                    subtitleColor: Colors.green,
-                    showChevron: true,
-                  ),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1C2632).withOpacity(0.7),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 1,
                 ),
-                Divider(
+              ),
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: displayDevices.length,
+                separatorBuilder: (context, index) => Divider(
                   color: Colors.white.withOpacity(0.05),
                   height: 1,
                 ),
-                if (displayDevices.length > 1)
-                  GestureDetector(
-                    onTap: () {
-                      if (_devices.isNotEmpty && _devices.length > 1) {
-                        _syncService.syncWithDevice(displayDevices[1].id);
-                      }
-                    },
+                itemBuilder: (context, i) {
+                  return GestureDetector(
+                    onTap: () => _syncService.syncWithDevice(displayDevices[i].id),
                     child: _buildDeviceListItem(
-                      icon: _getDeviceIcon(displayDevices[1].type),
-                      title: displayDevices[1].name,
-                      subtitle: displayDevices[1].status == SyncStatus.syncing
-                          ? 'Syncing files... ${((displayDevices[1].progress ?? 0.85) * 100).toInt()}%'
-                          : 'Last synced: ${_getTimeAgo(displayDevices[1].lastSyncTime)}',
-                      subtitleColor: displayDevices[1].status == SyncStatus.syncing
+                      icon: _getDeviceIcon(displayDevices[i].type),
+                      title: displayDevices[i].name,
+                      subtitle: displayDevices[i].status == SyncStatus.syncing
+                          ? 'Syncing files... ${((displayDevices[i].progress ?? 0) * 100).toInt()}%'
+                          : 'Last synced: ${_getTimeAgo(displayDevices[i].lastSyncTime)}',
+                      subtitleColor: displayDevices[i].status == SyncStatus.syncing
                           ? const Color(0xFF137FEC)
-                          : Colors.white.withOpacity(0.6),
-                      showPulse: displayDevices[1].status == SyncStatus.syncing,
+                          : (DateTime.now().difference(displayDevices[i].lastSyncTime).inMinutes < 30
+                              ? Colors.green
+                              : Colors.white.withOpacity(0.6)),
+                      showChevron: displayDevices[i].status != SyncStatus.syncing,
+                      showPulse: displayDevices[i].status == SyncStatus.syncing,
                     ),
-                  ),
-              ],
+                  );
+                },
+              ),
             ),
-          ),
           
           // Sync Now Button
           Padding(
@@ -381,11 +326,65 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
     );
   }
 
+  List<Widget> _buildOrbitingDevices() {
+    final List<Widget> widgets = [];
+    final positions = [
+      {'top': 60.0, 'left': 40.0},
+      {'bottom': 100.0, 'right': 30.0},
+      {'top': 80.0, 'right': 40.0},
+    ];
+    
+    for (int i = 0; i < _devices.length && i < 3; i++) {
+      final device = _devices[i];
+      final pos = positions[i];
+      
+      final isConnected = device.status == SyncStatus.idle && 
+                         DateTime.now().difference(device.lastSyncTime).inMinutes < 30;
+      final isSyncing = device.status == SyncStatus.syncing;
+      final label = isSyncing
+          ? 'Syncing ${((device.progress ?? 0) * 100).toInt()}%'
+          : (isConnected ? 'Connected' : _getDeviceTypeName(device.type));
+      
+      widgets.add(
+        Positioned(
+          top: pos['top'],
+          bottom: pos['bottom'],
+          left: pos['left'],
+          right: pos['right'],
+          child: GestureDetector(
+            onTap: () => _syncService.syncWithDevice(device.id),
+            child: _buildOrbitingDevice(
+              icon: _getDeviceIcon(device.type),
+              label: label,
+              isConnected: isConnected,
+              isSyncing: isSyncing,
+              progress: device.progress ?? 0.0,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    return widgets;
+  }
+
+  String _getDeviceTypeName(DeviceType type) {
+    switch (type) {
+      case DeviceType.iphone:
+        return 'iPhone';
+      case DeviceType.ipad:
+        return 'iPad';
+      case DeviceType.mac:
+        return 'Mac';
+    }
+  }
+
   Widget _buildOrbitingDevice({
     required IconData icon,
     required String label,
     bool isConnected = false,
     bool isSyncing = false,
+    double progress = 0.0,
   }) {
     return Column(
       children: [
@@ -429,7 +428,7 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
                 width: 60,
                 height: 60,
                 child: CircularProgressIndicator(
-                  value: 0.85,
+                  value: progress,
                   strokeWidth: 2,
                   valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF137FEC)),
                 ),

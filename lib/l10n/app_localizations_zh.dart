@@ -207,4 +207,64 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get createMarkdownNote => '创建 Markdown 笔记';
+
+  @override
+  String get bluetoothBinding => '蓝牙绑定';
+
+  @override
+  String get bluetoothBindingDesc => '管理已配对的设备以进行 P2P 同步';
+
+  @override
+  String get boundDevices => '已绑定设备';
+
+  @override
+  String get availableDevices => '可用设备';
+
+  @override
+  String get noBoundDevices => '还没有绑定的设备';
+
+  @override
+  String get noDevicesFound => '未找到设备\n点击 \"搜索设备\" 开始扫描';
+
+  @override
+  String get scanning => '扫描中...';
+
+  @override
+  String get searchForDevices => '搜索设备';
+
+  @override
+  String get searching => '搜索中...';
+
+  @override
+  String get showMyQr => '我的二维码';
+
+  @override
+  String get scanQrToPair => '扫码配对';
+
+  @override
+  String get enterPairingPassword => '输入配对密码';
+
+  @override
+  String linkTo(String name) {
+    return '链接到 \"$name\"';
+  }
+
+  @override
+  String get link => '链接';
+
+  @override
+  String get pairingHint => '点击设备以开始配对。确保对方设备处于可发现模式并且已启用蓝牙以进行本地 P2P 同步。';
+
+  @override
+  String pairedSuccessfully(String name) {
+    return '已成功与 $name 配对';
+  }
+
+  @override
+  String unboundFrom(String name) {
+    return '已与 $name 解绑';
+  }
+
+  @override
+  String get enterFourDigitPassword => '请输入 4 位数字密码';
 }

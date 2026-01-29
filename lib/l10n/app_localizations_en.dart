@@ -210,4 +210,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createMarkdownNote => 'Create Markdown Note';
+
+  @override
+  String get bluetoothBinding => 'Bluetooth Binding';
+
+  @override
+  String get bluetoothBindingDesc => 'Manage paired devices for P2P sync';
+
+  @override
+  String get boundDevices => 'BOUND DEVICES';
+
+  @override
+  String get availableDevices => 'AVAILABLE DEVICES';
+
+  @override
+  String get noBoundDevices => 'No bound devices yet';
+
+  @override
+  String get noDevicesFound =>
+      'No devices found\nTap \"Search for Devices\" to scan';
+
+  @override
+  String get scanning => 'Scanning...';
+
+  @override
+  String get searchForDevices => 'Search for Devices';
+
+  @override
+  String get searching => 'Searching...';
+
+  @override
+  String get showMyQr => 'My QR Code';
+
+  @override
+  String get scanQrToPair => 'Scan to Pair';
+
+  @override
+  String get enterPairingPassword => 'Enter Pairing Password';
+
+  @override
+  String linkTo(String name) {
+    return 'Link to \"$name\"';
+  }
+
+  @override
+  String get link => 'Link';
+
+  @override
+  String get pairingHint =>
+      'Tap a device to initiate pairing. Ensure the other device is in discovery mode and has Bluetooth enabled for local P2P sync.';
+
+  @override
+  String pairedSuccessfully(String name) {
+    return 'Successfully paired with $name';
+  }
+
+  @override
+  String unboundFrom(String name) {
+    return 'Unbound from $name';
+  }
+
+  @override
+  String get enterFourDigitPassword => 'Please enter a 4-digit password';
 }

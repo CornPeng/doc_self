@@ -6,8 +6,9 @@ import 'package:soul_note/theme/app_theme.dart';
 import 'package:soul_note/screens/main_navigation.dart';
 import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/providers/language_provider.dart';
+import 'package:soul_note/services/sync_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // 设置状态栏样式
@@ -17,6 +18,9 @@ void main() {
       statusBarIconBrightness: Brightness.light,
     ),
   );
+  
+  // 初始化同步服务
+  await SyncService().initialize();
   
   runApp(
     ChangeNotifierProvider(

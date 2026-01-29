@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:soul_note/providers/language_provider.dart';
 import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/services/database_service.dart';
+import 'package:soul_note/screens/bluetooth_binding_screen.dart';
+import 'package:soul_note/screens/qr_bluetooth_binding_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -41,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             child: _buildLanguageSetting(),
           ),
-          
+
           // Identity & Storage Section
           _buildSectionHeader('IDENTITY & STORAGE'),
           Container(
@@ -90,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-          
+
           // Connectivity Section
           _buildSectionHeader('CONNECTIVITY'),
           Container(
@@ -105,23 +107,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
-            child: _buildSettingItem(
-              icon: Icons.sync,
-              iconColor: Colors.orange,
-              title: 'Auto-Sync Preferences',
-              subtitle: 'Bluetooth auto-discovery for local sync',
-              trailing: Switch(
-                value: _autoSyncEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _autoSyncEnabled = value;
-                  });
-                },
-                activeTrackColor: const Color(0xFF137FEC),
-              ),
+            child: Column(
+              children: [
+                _buildSettingItem(
+                  icon: Icons.bluetooth,
+                  iconColor: const Color(0xFF3B82F6),
+                  title: 'Bluetooth Search',
+                  subtitle: 'Manual search & pairing',
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withOpacity(0.4),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BluetoothBindingScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Divider(
+                  color: Colors.white.withOpacity(0.05),
+                  height: 1,
+                  indent: 72,
+                ),
+                _buildSettingItem(
+                  icon: Icons.qr_code_scanner,
+                  iconColor: const Color(0xFF8B5CF6),
+                  title: 'QR Code Binding',
+                  subtitle: 'Scan to bind devices quickly',
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withOpacity(0.4),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const QrBluetoothBindingScreen(),
+                      ),
+                    );
+                  },
+                ),
+                Divider(
+                  color: Colors.white.withOpacity(0.05),
+                  height: 1,
+                  indent: 72,
+                ),
+                _buildSettingItem(
+                  icon: Icons.sync,
+                  iconColor: Colors.orange,
+                  title: 'Auto-Sync Preferences',
+                  subtitle: 'Bluetooth auto-discovery for local sync',
+                  trailing: Switch(
+                    value: _autoSyncEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _autoSyncEnabled = value;
+                      });
+                    },
+                    activeTrackColor: const Color(0xFF137FEC),
+                  ),
+                ),
+              ],
             ),
           ),
-          
+
           // Danger Zone Section
           _buildSectionHeader('DANGER ZONE', color: Colors.red),
           Container(
@@ -158,9 +210,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 40),
-          
+
           // Footer Philosophy
           Column(
             children: [
@@ -268,8 +320,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Row(
               children: [
                 Text(
-                  currentLocale.languageCode == 'zh' 
-                      ? l10n.languageChinese 
+                  currentLocale.languageCode == 'zh'
+                      ? l10n.languageChinese
                       : l10n.languageEnglish,
                   style: const TextStyle(
                     color: Colors.white70,
@@ -291,7 +343,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showLanguageDialog() {
     final l10n = AppLocalizations.of(context)!;
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final languageProvider =
+        Provider.of<LanguageProvider>(context, listen: false);
     final currentLocale = languageProvider.locale;
 
     showDialog(
@@ -337,7 +390,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     LanguageProvider languageProvider,
   ) {
     final isSelected = currentLocale == locale;
-    
+
     return InkWell(
       onTap: () {
         languageProvider.setLocale(locale);
@@ -346,12 +399,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? const Color(0xFF137FEC).withOpacity(0.2)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected 
+            color: isSelected
                 ? const Color(0xFF137FEC)
                 : Colors.white.withOpacity(0.1),
             width: 1,
@@ -452,7 +505,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showDeleteDialog() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -487,11 +540,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _deleteAllData() async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     try {
       // Delete all data from database
       await DatabaseService.instance.deleteAllData();
-      
+
       // Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // 颜色定义
@@ -15,7 +14,7 @@ class AppTheme {
       brightness: Brightness.dark,
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundDark,
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+      fontFamily: '.SF Pro Text', // iOS 系统字体
       
       colorScheme: const ColorScheme.dark(
         primary: primaryColor,
@@ -36,10 +35,11 @@ class AppTheme {
         backgroundColor: backgroundDark.withOpacity(0.8),
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.inter(
+        titleTextStyle: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w700,
           color: Colors.white,
+          fontFamily: '.SF Pro Text',
         ),
       ),
       

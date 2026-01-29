@@ -12,7 +12,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  google_fonts: ^6.1.0
   intl: ^0.20.2
   sqflite: ^2.3.0
   path_provider: ^2.1.1
@@ -28,6 +27,8 @@ dependencies:
   local_auth: ^2.2.0
   crypto: ^3.0.3
   device_info_plus: ^11.1.1
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^5.2.3
 
 dev_dependencies:
   flutter_test:

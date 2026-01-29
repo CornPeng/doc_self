@@ -43,6 +43,11 @@ class Message {
     );
   }
 
+  // JSON serialization (same as toMap/fromMap)
+  Map<String, dynamic> toJson() => toMap();
+  
+  factory Message.fromJson(Map<String, dynamic> json) => Message.fromMap(json);
+
   Message copyWith({
     String? id,
     String? noteId,

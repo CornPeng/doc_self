@@ -97,5 +97,44 @@
   "chatNotes": "Chat Notes",
   "markdownNotes": "Markdown Notes",
   "createChatNote": "Create Chat Note",
-  "createMarkdownNote": "Create Markdown Note"
+  "createMarkdownNote": "Create Markdown Note",
+  "bluetoothBinding": "Bluetooth Binding",
+  "bluetoothBindingDesc": "Manage paired devices for P2P sync",
+  "boundDevices": "BOUND DEVICES",
+  "availableDevices": "AVAILABLE DEVICES",
+  "noBoundDevices": "No bound devices yet",
+  "noDevicesFound": "No devices found\nTap \"Search for Devices\" to scan",
+  "scanning": "Scanning...",
+  "searchForDevices": "Search for Devices",
+  "searching": "Searching...",
+  "showMyQr": "My QR Code",
+  "scanQrToPair": "Scan to Pair",
+  "enterPairingPassword": "Enter Pairing Password",
+  "linkTo": "Link to \"{name}\"",
+  "@linkTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "link": "Link",
+  "pairingHint": "Tap a device to initiate pairing. Ensure the other device is in discovery mode and has Bluetooth enabled for local P2P sync.",
+  "pairedSuccessfully": "Successfully paired with {name}",
+  "@pairedSuccessfully": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "unboundFrom": "Unbound from {name}",
+  "@unboundFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "enterFourDigitPassword": "Please enter a 4-digit password"
 }

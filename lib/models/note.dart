@@ -59,6 +59,11 @@ class Note {
     );
   }
 
+  // JSON serialization (same as toMap/fromMap)
+  Map<String, dynamic> toJson() => toMap();
+  
+  factory Note.fromJson(Map<String, dynamic> json) => Note.fromMap(json);
+
   Note copyWith({
     String? id,
     String? title,

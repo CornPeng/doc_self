@@ -61,5 +61,10 @@
 	<string>SoulNote needs permission to save images and videos to your photo library.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>SoulNote uses Face ID to authenticate and securely sync your notes between devices.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_soulnote-sync._tcp</string>
+		<string>_soulnote-sync._udp</string>
+	</array>
 </dict>
 </plist>
