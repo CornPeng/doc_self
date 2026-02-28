@@ -5,6 +5,7 @@ import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/services/database_service.dart';
 import 'package:soul_note/screens/bluetooth_binding_screen.dart';
 import 'package:soul_note/screens/qr_bluetooth_binding_screen.dart';
+import 'package:soul_note/screens/auto_sync_radar_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -158,17 +159,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingItem(
                   icon: Icons.sync,
                   iconColor: Colors.orange,
-                  title: 'Auto-Sync Preferences',
-                  subtitle: 'Bluetooth auto-discovery for local sync',
-                  trailing: Switch(
-                    value: _autoSyncEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _autoSyncEnabled = value;
-                      });
-                    },
-                    activeTrackColor: const Color(0xFF137FEC),
+                  title: 'Auto-Sync Radar',
+                  subtitle: 'Periodic sync & logs (Beta)',
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withOpacity(0.4),
                   ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AutoSyncRadarScreen(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

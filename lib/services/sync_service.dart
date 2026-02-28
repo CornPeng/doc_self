@@ -137,7 +137,7 @@ class SyncService {
   Future<void> initialize() async {
     await _loadDeviceInfo();
     await _loadTrustedDevices();
-
+    
     // 初始化 Multipeer Connectivity
     if (_deviceName != null) {
       await _multipeer.initialize(_deviceName!);
@@ -166,7 +166,7 @@ class SyncService {
         _deviceName = macInfo.computerName;
         _deviceType = DeviceType.mac;
       }
-
+      
       print('✅ 设备信息加载完成: $_deviceName ($_deviceType)');
     } catch (e) {
       print('❌ 加载设备信息失败: $e');
@@ -202,7 +202,7 @@ class SyncService {
 
   void _handlePeerFound(String peerId, String peerName) {
     print('📱 发现设备: $peerName');
-
+    
     // 判断设备类型
     DeviceType type = DeviceType.iphone;
     final lowerName = peerName.toLowerCase();
@@ -238,10 +238,9 @@ class SyncService {
     _devicesController.add(_connectedDevices);
   }
 
-  void _handleInvitationReceived(String peerId, String peerName,
-      {String? pairingCode}) {
+  void _handleInvitationReceived(String peerId, String peerName, {String? pairingCode}) {
     print('📥 收到连接邀请: $peerName');
-
+    
     // 如果有配对码，说明这是扫码发起的配对，自动接受
     if (pairingCode != null && pairingCode.isNotEmpty) {
       print('✅ 收到扫码配对邀请，配对码: $pairingCode');
@@ -249,13 +248,13 @@ class SyncService {
       _multipeer.acceptInvitation();
       return;
     }
-
+    
     // 已信任设备的邀请，自动接受
     if (isTrustedDevice(peerId)) {
       _multipeer.acceptInvitation();
       return;
     }
-
+    
     // 其他情况，暂时自动接受（可以根据需要改为弹出确认对话框）
     print('⚠️ 收到未知设备的邀请，自动接受');
     _multipeer.acceptInvitation();
@@ -263,22 +262,21 @@ class SyncService {
 
   void _handlePeerStateChanged(String peerId, PeerConnectionState state) {
     print('🔄 设备状态变化: $peerId -> $state');
-
+    
     final index = _connectedDevices.indexWhere((d) => d.id == peerId);
     if (index != -1) {
       _connectedDevices[index] = _connectedDevices[index].copyWith(
         isConnected: state == PeerConnectionState.connected,
-        status: state == PeerConnectionState.connected
-            ? SyncStatus.idle
-            : (state == PeerConnectionState.connecting
-                ? SyncStatus.connecting
+        status: state == PeerConnectionState.connected 
+            ? SyncStatus.idle 
+            : (state == PeerConnectionState.connecting 
+                ? SyncStatus.connecting 
                 : SyncStatus.idle),
       );
       _devicesController.add(_connectedDevices);
-
+      
       // 连接成功后，如果有待验证的配对码，说明这是扫码配对，等待对方发送验证
-      if (state == PeerConnectionState.connected &&
-          _pendingPairingCodes.containsKey(peerId)) {
+      if (state == PeerConnectionState.connected && _pendingPairingCodes.containsKey(peerId)) {
         print('✅ 扫码配对连接成功，等待对方发送配对码验证: $peerId');
       }
     }
@@ -286,13 +284,13 @@ class SyncService {
 
   void _handleDataReceived(String peerId, List<int> data) {
     print('📨 收到数据: ${data.length} bytes <- $peerId');
-
+    
     try {
       final jsonStr = utf8.decode(data);
       final Map<String, dynamic> payload = jsonDecode(jsonStr);
-
+      
       final type = payload['type'] as String;
-
+      
       switch (type) {
         case 'note':
           _receiveNote(payload['data']);
@@ -324,11 +322,11 @@ class SyncService {
     print('🔐 收到配对码验证请求: $peerId');
     final code = payload['code'] as String?;
     final expected = _pendingPairingCodes[peerId];
-
+    
     print('  收到的配对码: $code');
     print('  期望的配对码: $expected');
     print('  待验证的配对码列表: $_pendingPairingCodes');
-
+    
     if (code == null || expected == null) {
       print('❌ 配对验证失败: 缺少配对码 (code=$code, expected=$expected)');
       _pairingResultController.add(
@@ -362,7 +360,7 @@ class SyncService {
         break;
       }
     }
-
+    
     // 添加为信任设备
     await addTrustedDevice(
       peerId,
@@ -370,7 +368,7 @@ class SyncService {
       type: device?.type ?? DeviceType.iphone,
     );
     _pendingPairingCodes.remove(peerId);
-
+    
     print('✅ 配对验证成功: $peerId，已添加为信任设备');
     _pairingResultController.add(
       PairingResult(
@@ -385,7 +383,7 @@ class SyncService {
   void _handlePairingResult(String peerId, Map<String, dynamic> payload) {
     final success = payload['success'] as bool? ?? false;
     final message = payload['message'] as String? ?? '配对结果未知';
-
+    
     // 如果配对成功，接收方也需要添加对方为信任设备
     if (success) {
       ConnectedDevice? device;
@@ -402,7 +400,7 @@ class SyncService {
       );
       print('✅ 接收方已添加对方为信任设备: $peerId');
     }
-
+    
     _pairingResultController.add(
       PairingResult(
         peerId: peerId,
@@ -430,11 +428,11 @@ class SyncService {
   Future<void> _receiveNote(Map<String, dynamic> noteData) async {
     try {
       final note = Note.fromJson(noteData);
-
+      
       // 检查本地是否已有这个笔记
       final localNotes = await _db.getAllNotes();
       final existingNote = localNotes.where((n) => n.id == note.id).firstOrNull;
-
+      
       if (existingNote == null) {
         // 新笔记，直接创建
         await _db.createNote(note);
@@ -583,26 +581,22 @@ class SyncService {
     _devicesController.add(_connectedDevices);
 
     try {
-      // 确保先播种已连接的设备
-      _seedConnectedPeersForBinding();
-
       // 同时开启广播和搜索
       await _multipeer.startAdvertising();
       await _multipeer.startBrowsing();
-
+      _seedConnectedPeersForBinding();
+      
       print('🔍 开始扫描附近设备（用于绑定）...');
       print('📱 当前设备: $_deviceName');
       print('🔊 正在广播: $_deviceName');
       print('🔍 正在搜索其他设备...');
-
+      
       // 30秒后自动停止扫描（延长时间以便发现）
       Future.delayed(const Duration(seconds: 30), () {
-        if (_currentStatus == SyncStatus.scanning) {
-          _updateStatus(SyncStatus.idle);
-          print('✅ 扫描完成，发现 ${_connectedDevices.length} 台设备');
-          if (_connectedDevices.isEmpty) {
-            print('💡 提示：确保两个设备都在蓝牙绑定页面点击了"搜索设备"');
-          }
+        _updateStatus(SyncStatus.idle);
+        print('✅ 扫描完成，发现 ${_connectedDevices.length} 台设备');
+        if (_connectedDevices.isEmpty) {
+          print('💡 提示：确保两个设备都在蓝牙绑定页面点击了"搜索设备"');
         }
       });
     } catch (e) {
@@ -646,30 +640,24 @@ class SyncService {
   // 开始扫描已绑定的设备（用于同步）
   Future<void> startScanning() async {
     _updateStatus(SyncStatus.scanning);
-
+    
     // 清空未信任的设备
     _connectedDevices.removeWhere((d) => !isTrustedDevice(d.id));
     _devicesController.add(_connectedDevices);
 
     try {
-      // 确保先播种已连接的设备
-      _seedConnectedPeersForBinding();
-
       // 同时开启广播和搜索
       await _multipeer.startAdvertising();
       await _multipeer.startBrowsing();
-
+      
       print('🔍 开始扫描已绑定设备...');
-
+      
       // 10秒后自动停止扫描
       Future.delayed(const Duration(seconds: 10), () {
-        if (_currentStatus == SyncStatus.scanning) {
-          _updateStatus(SyncStatus.idle);
-
-          final trustedDevices =
-              _connectedDevices.where((d) => isTrustedDevice(d.id)).toList();
-          print('✅ 扫描完成，发现 ${trustedDevices.length} 台已绑定设备');
-        }
+        _updateStatus(SyncStatus.idle);
+        
+        final trustedDevices = _connectedDevices.where((d) => isTrustedDevice(d.id)).toList();
+        print('✅ 扫描完成，发现 ${trustedDevices.length} 台已绑定设备');
       });
     } catch (e) {
       print('❌ 扫描失败: $e');
@@ -705,51 +693,29 @@ class SyncService {
     try {
       // 获取本地所有笔记
       final localNotes = await _db.getAllNotes();
-
-      // 发送每个笔记及其关联的消息
+      
+      // 发送每个笔记
       for (int i = 0; i < localNotes.length; i++) {
         final note = localNotes[i];
-
-        // 1. 发送笔记本身
-        final notePayload = {
+        final payload = {
           'type': 'note',
           'data': note.toJson(),
         };
-
-        final noteJsonStr = jsonEncode(notePayload);
-        final noteData = utf8.encode(noteJsonStr);
-        await _multipeer.sendData(deviceId, noteData);
-
-        // 2. 获取并发送该笔记下的所有消息
-        try {
-          final messages = await _db.getMessagesForNote(note.id);
-          if (messages.isNotEmpty) {
-            print('📤 正在同步笔记 "${note.title}" 的 ${messages.length} 条消息...');
-            for (final message in messages) {
-              final messagePayload = {
-                'type': 'message',
-                'data': message.toJson(),
-              };
-              final messageJsonStr = jsonEncode(messagePayload);
-              final messageData = utf8.encode(messageJsonStr);
-              await _multipeer.sendData(deviceId, messageData);
-              // 短暂延迟，避免发送过快导致缓冲区溢出
-              await Future.delayed(const Duration(milliseconds: 10));
-            }
-          }
-        } catch (e) {
-          print('⚠️ 获取笔记消息失败: ${note.id} - $e');
-        }
-
+        
+        final jsonStr = jsonEncode(payload);
+        final data = utf8.encode(jsonStr);
+        
+        await _multipeer.sendData(deviceId, data);
+        
         final progress = (i + 1) / localNotes.length;
         _updateDeviceStatus(deviceId, SyncStatus.syncing, progress);
-
-        await Future.delayed(const Duration(milliseconds: 50));
+        
+        await Future.delayed(const Duration(milliseconds: 100));
       }
 
       // 同步完成
       _updateDeviceStatus(deviceId, SyncStatus.completed, 1.0);
-
+      
       // 更新最后同步时间
       final index = _connectedDevices.indexWhere((d) => d.id == deviceId);
       if (index != -1) {
@@ -776,48 +742,20 @@ class SyncService {
 
   // 与所有设备同步
   Future<void> syncWithAllDevices() async {
-    // 过滤出可信任的设备，不论其连接状态（如果是未连接的，可以尝试连接或提示）
-    // 注意：_connectedDevices 列表中包含了所有已发现的设备
-    final trustedDevices =
-        _connectedDevices.where((d) => isTrustedDevice(d.id)).toList();
-
-    if (trustedDevices.isEmpty) {
-      print('⚠️ 没有已发现的可信任设备');
+    final connectedDevices = _connectedDevices.where((d) => d.isConnected && isTrustedDevice(d.id)).toList();
+    
+    if (connectedDevices.isEmpty) {
+      print('⚠️ 没有已连接的可信任设备');
       return;
     }
 
     _updateStatus(SyncStatus.syncing);
 
-    int successCount = 0;
-    for (final device in trustedDevices) {
-      if (!device.isConnected) {
-        print('⏳ 尝试连接设备: ${device.name} (${device.id})');
-        // 尝试邀请连接
-        await inviteDevice(device.id);
-        // 等待连接建立，简单等待2秒
-        await Future.delayed(const Duration(seconds: 2));
-
-        // 重新检查连接状态
-        final updatedDevice = _connectedDevices
-            .firstWhere((d) => d.id == device.id, orElse: () => device);
-        if (!updatedDevice.isConnected) {
-          print('❌ 无法连接到设备: ${device.name}');
-          continue;
-        }
-      }
-
-      print('📤 开始同步设备: ${device.name}');
+    for (final device in connectedDevices) {
       await syncWithDevice(device.id);
-      successCount++;
     }
 
-    if (successCount > 0) {
-      _updateStatus(SyncStatus.completed);
-    } else {
-      _updateStatus(SyncStatus.idle);
-      print('⚠️ 没有成功同步任何设备');
-    }
-
+    _updateStatus(SyncStatus.completed);
     await Future.delayed(const Duration(seconds: 1));
     _updateStatus(SyncStatus.idle);
   }
@@ -827,8 +765,7 @@ class SyncService {
     if (remoteNote.updatedAt.isAfter(localNote.updatedAt)) {
       // 重命名本地笔记为冲突副本
       final conflictNote = localNote.copyWith(
-        title:
-            '${localNote.title} (冲突副本 - ${_formatDateTime(localNote.updatedAt)})',
+        title: '${localNote.title} (冲突副本 - ${_formatDateTime(localNote.updatedAt)})',
       );
       await _db.updateNote(conflictNote);
 
@@ -838,8 +775,7 @@ class SyncService {
       // 远程笔记更旧，保存为冲突副本
       final conflictNote = remoteNote.copyWith(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title:
-            '${remoteNote.title} (冲突副本 - ${_formatDateTime(remoteNote.updatedAt)})',
+        title: '${remoteNote.title} (冲突副本 - ${_formatDateTime(remoteNote.updatedAt)})',
       );
       await _db.createNote(conflictNote);
     }
@@ -857,8 +793,7 @@ class SyncService {
   }
 
   // 更新设备状态
-  void _updateDeviceStatus(String deviceId, SyncStatus status,
-      [double? progress]) {
+  void _updateDeviceStatus(String deviceId, SyncStatus status, [double? progress]) {
     final index = _connectedDevices.indexWhere((d) => d.id == deviceId);
     if (index != -1) {
       _connectedDevices[index] = _connectedDevices[index].copyWith(
