@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:soul_note/models/note.dart';
@@ -244,6 +245,30 @@ class DatabaseService {
   }
 
   // ============ 关闭数据库 ============
+
+  /// 返回 notes + messages 表实际数据行数（笔记数、消息数）和 DB 文件大小（字节）
+  Future<Map<String, dynamic>> getStorageStats() async {
+    final db = await database;
+
+    final noteCountResult = await db.rawQuery('SELECT COUNT(*) as cnt FROM notes');
+    final noteCount = (noteCountResult.first['cnt'] as int?) ?? 0;
+
+    final msgCountResult = await db.rawQuery('SELECT COUNT(*) as cnt FROM messages');
+    final msgCount = (msgCountResult.first['cnt'] as int?) ?? 0;
+
+    final dbPath = await getDatabasesPath();
+    final filePath = join(dbPath, 'soulnote.db');
+    int fileSize = 0;
+    try {
+      fileSize = await File(filePath).length();
+    } catch (_) {}
+
+    return {
+      'noteCount': noteCount,
+      'messageCount': msgCount,
+      'fileSizeBytes': fileSize,
+    };
+  }
 
   Future<void> close() async {
     final db = await database;

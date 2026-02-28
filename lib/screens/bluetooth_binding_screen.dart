@@ -1301,46 +1301,6 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _showMyQrCode,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: BorderSide(
-                                  color: Colors.white.withOpacity(0.2),
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
-                              ),
-                              child: Text(l10n.showMyQr),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _showScanQrDialog,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: BorderSide(
-                                  color: Colors.white.withOpacity(0.2),
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
-                              ),
-                              child: Text(l10n.scanQrToPair),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
                       SizedBox(
                         height: 56,
                         child: ElevatedButton(

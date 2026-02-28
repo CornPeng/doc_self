@@ -4,8 +4,7 @@ import 'package:soul_note/providers/language_provider.dart';
 import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/services/database_service.dart';
 import 'package:soul_note/screens/bluetooth_binding_screen.dart';
-import 'package:soul_note/screens/qr_bluetooth_binding_screen.dart';
-import 'package:soul_note/screens/auto_sync_radar_screen.dart';
+import 'package:soul_note/screens/sync_radar_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -16,6 +15,35 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _autoSyncEnabled = true;
+  String _storageSubtitle = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStorageStats();
+  }
+
+  Future<void> _loadStorageStats() async {
+    final stats = await DatabaseService.instance.getStorageStats();
+    final noteCount = stats['noteCount'] as int;
+    final msgCount = stats['messageCount'] as int;
+    final bytes = stats['fileSizeBytes'] as int;
+
+    String sizeStr;
+    if (bytes < 1024) {
+      sizeStr = '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      sizeStr = '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else {
+      sizeStr = '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+
+    if (mounted) {
+      setState(() {
+        _storageSubtitle = '$noteCount notes · $msgCount messages · $sizeStr';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +73,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: _buildLanguageSetting(),
           ),
 
-          // Identity & Storage Section
-          _buildSectionHeader('IDENTITY & STORAGE'),
+          // Storage Section
+          _buildSectionHeader('STORAGE'),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
@@ -59,38 +87,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
-            child: Column(
-              children: [
-                _buildSettingItem(
-                  icon: Icons.person,
-                  iconColor: const Color(0xFF137FEC),
-                  title: 'Device Identity',
-                  subtitle: 'Visible to nearby P2P devices',
-                  trailing: const Text(
-                    'iPhone (Alex)',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: Colors.white.withOpacity(0.05),
-                  height: 1,
-                  indent: 72,
-                ),
-                _buildSettingItem(
-                  icon: Icons.storage,
-                  iconColor: Colors.green,
-                  title: 'Storage Management',
-                  subtitle: 'Local database: 24.5 MB',
-                  trailing: Icon(
-                    Icons.chevron_right,
-                    color: Colors.white.withOpacity(0.4),
-                  ),
-                  onTap: () {},
-                ),
-              ],
+            child: _buildSettingItem(
+              icon: Icons.storage,
+              iconColor: Colors.green,
+              title: 'Storage Management',
+              subtitle: _storageSubtitle,
+              onTap: _loadStorageStats,
             ),
           ),
 
@@ -134,33 +136,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   indent: 72,
                 ),
                 _buildSettingItem(
-                  icon: Icons.qr_code_scanner,
-                  iconColor: const Color(0xFF8B5CF6),
-                  title: 'QR Code Binding',
-                  subtitle: 'Scan to bind devices quickly',
-                  trailing: Icon(
-                    Icons.chevron_right,
-                    color: Colors.white.withOpacity(0.4),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const QrBluetoothBindingScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Divider(
-                  color: Colors.white.withOpacity(0.05),
-                  height: 1,
-                  indent: 72,
-                ),
-                _buildSettingItem(
                   icon: Icons.sync,
-                  iconColor: Colors.orange,
-                  title: 'Auto-Sync Radar',
-                  subtitle: 'Periodic sync & logs (Beta)',
+                  iconColor: const Color(0xFF137FEC),
+                  title: 'Sync',
+                  subtitle: 'Sync with nearby devices',
                   trailing: Icon(
                     Icons.chevron_right,
                     color: Colors.white.withOpacity(0.4),
@@ -169,7 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AutoSyncRadarScreen(),
+                        builder: (context) => const SyncRadarScreen(),
                       ),
                     );
                   },
