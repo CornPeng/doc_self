@@ -368,6 +368,7 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
             ),
             child: Row(
               children: [
+                // 左侧：预览
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _tabController.animateTo(0),
@@ -384,7 +385,7 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
                         ),
                       ),
                       child: Text(
-                        l10n.edit,
+                        l10n.preview,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -397,6 +398,7 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
                     ),
                   ),
                 ),
+                // 右侧：编辑
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _tabController.animateTo(1),
@@ -413,7 +415,7 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
                         ),
                       ),
                       child: Text(
-                        l10n.preview,
+                        l10n.edit,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -429,18 +431,18 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
               ],
             ),
           ),
-          // Content
+          // Content：左预览，右编辑
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildEditor(),
                 _buildPreview(),
+                _buildEditor(),
               ],
             ),
           ),
-          // Toolbar
-          if (_tabController.index == 0) _buildToolbar(),
+          // Toolbar（仅在编辑页签显示）
+          if (_tabController.index == 1) _buildToolbar(),
         ],
       ),
     );
@@ -496,12 +498,13 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
 
   Widget _buildPreview() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       color: const Color(0xFF0F172A),
       child: Container(
+        width: double.infinity,
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Colors.white.withOpacity(0.05),
             width: 1,
@@ -514,81 +517,88 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
             ),
           ],
         ),
-        padding: const EdgeInsets.all(20),
-        child: Markdown(
-          data: _contentController.text.isEmpty
-              ? '# 预览\n\n在编辑器中输入 Markdown 内容，这里将显示预览效果。'
-              : _contentController.text,
-          styleSheet: MarkdownStyleSheet(
-            p: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 15,
-              height: 1.6,
-            ),
-            h1: const TextStyle(
-              color: Color(0xFF60A5FA),
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-              height: 1.3,
-            ),
-            h2: const TextStyle(
-              color: Color(0xFF60A5FA),
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              height: 1.3,
-            ),
-            h3: const TextStyle(
-              color: Color(0xFF60A5FA),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              height: 1.3,
-            ),
-            h4: const TextStyle(
-              color: Color(0xFF60A5FA),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            h5: const TextStyle(
-              color: Color(0xFF60A5FA),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-            h6: const TextStyle(
-              color: Color(0xFF60A5FA),
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-            blockquote: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 15,
-              fontStyle: FontStyle.italic,
-            ),
-            code: TextStyle(
-              color: const Color(0xFF93C5FD),
-              backgroundColor: Colors.white.withOpacity(0.08),
-              fontFamily: 'monospace',
-              fontSize: 14,
-            ),
-            codeblockDecoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            codeblockPadding: const EdgeInsets.all(12),
-            listBullet: const TextStyle(
-              color: Color(0xFF94A3B8),
-              fontSize: 15,
-            ),
-            a: const TextStyle(
-              color: Color(0xFF93C5FD),
-              decoration: TextDecoration.underline,
-            ),
-            strong: const TextStyle(
-              color: Color(0xFFE2E8F0),
-              fontWeight: FontWeight.w600,
-            ),
-            em: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontStyle: FontStyle.italic,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: SingleChildScrollView(
+          child: Markdown(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            data: _contentController.text.isEmpty
+                ? '# 预览\n\n在编辑器中输入 Markdown 内容，这里将显示预览效果。'
+                : _contentController.text,
+            styleSheet: MarkdownStyleSheet(
+              blockSpacing: 8,
+              listIndent: 24,
+              blockquotePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              codeblockPadding: const EdgeInsets.all(8),
+              p: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 15,
+                height: 1.6,
+              ),
+              h1: const TextStyle(
+                color: Color(0xFF60A5FA),
+                fontSize: 26,
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+              ),
+              h2: const TextStyle(
+                color: Color(0xFF60A5FA),
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+              ),
+              h3: const TextStyle(
+                color: Color(0xFF60A5FA),
+                fontSize: 19,
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+              ),
+              h4: const TextStyle(
+                color: Color(0xFF60A5FA),
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+              ),
+              h5: const TextStyle(
+                color: Color(0xFF60A5FA),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              h6: const TextStyle(
+                color: Color(0xFF60A5FA),
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+              blockquote: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 15,
+                fontStyle: FontStyle.italic,
+              ),
+              code: TextStyle(
+                color: const Color(0xFF93C5FD),
+                backgroundColor: Colors.white.withOpacity(0.08),
+                fontFamily: 'monospace',
+                fontSize: 14,
+              ),
+              codeblockDecoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              listBullet: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontSize: 15,
+              ),
+              a: const TextStyle(
+                color: Color(0xFF93C5FD),
+                decoration: TextDecoration.underline,
+              ),
+              strong: const TextStyle(
+                color: Color(0xFFE2E8F0),
+                fontWeight: FontWeight.w600,
+              ),
+              em: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ),
         ),
@@ -607,7 +617,7 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
           ),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [

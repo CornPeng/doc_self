@@ -144,6 +144,58 @@ class DatabaseService {
     return message;
   }
 
+  /// 同步时用：按 id 插入消息，若本地已有该 id 则跳过（消息不可变，取并集）
+  Future<bool> insertOrIgnoreMessage(Message message) async {
+    final db = await database;
+    final rows = await db.insert(
+      'messages',
+      message.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    return rows > 0; // true = 新插入；false = 已存在跳过
+  }
+
+  /// 同步收完消息后，用 DB 实际条数修正 note 的 messageCount / lastMessagePreview
+  Future<void> recalculateNoteStats(String noteId) async {
+    final db = await database;
+    final countResult = await db.rawQuery(
+      'SELECT COUNT(*) as cnt FROM messages WHERE noteId = ?',
+      [noteId],
+    );
+    final count = (countResult.first['cnt'] as int?) ?? 0;
+
+    final lastResult = await db.query(
+      'messages',
+      where: 'noteId = ?',
+      whereArgs: [noteId],
+      orderBy: 'createdAt DESC',
+      limit: 1,
+    );
+    String? preview;
+    String? previewType;
+    DateTime? lastTime;
+    if (lastResult.isNotEmpty) {
+      final last = Message.fromMap(lastResult.first);
+      previewType = last.type.toString().split('.').last;
+      lastTime = last.createdAt;
+      preview = last.type == MessageType.text
+          ? last.content
+          : last.type == MessageType.image
+              ? '[图片]'
+              : '[视频]';
+    }
+
+    final note = await getNote(noteId);
+    if (note != null) {
+      await updateNote(note.copyWith(
+        messageCount: count,
+        lastMessagePreview: preview ?? note.lastMessagePreview,
+        lastMessageType: previewType ?? note.lastMessageType,
+        updatedAt: lastTime ?? note.updatedAt,
+      ));
+    }
+  }
+
   Future<List<Message>> getMessagesForNote(String noteId) async {
     final db = await database;
     final result = await db.query(

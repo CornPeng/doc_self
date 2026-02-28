@@ -173,30 +173,42 @@ class SyncService {
     }
   }
 
-  // 设置 Multipeer 事件监听
+  // 设置 Multipeer 事件监听（单条事件异常不导致整机崩溃）
   void _setupMultipeerListeners() {
     _multipeer.eventStream.listen((event) {
-      switch (event.type) {
-        case MultipeerEventType.peerFound:
-          _handlePeerFound(event.peerId, event.peerName);
-          break;
-        case MultipeerEventType.peerLost:
-          _handlePeerLost(event.peerId);
-          break;
-        case MultipeerEventType.invitationReceived:
-          _handleInvitationReceived(
-            event.peerId,
-            event.peerName,
-            pairingCode: event.pairingCode,
-          );
-          break;
-        case MultipeerEventType.peerStateChanged:
-          _handlePeerStateChanged(event.peerId, event.state!);
-          break;
-        case MultipeerEventType.dataReceived:
-          _handleDataReceived(event.peerId, event.data!);
-          break;
+      try {
+        switch (event.type) {
+          case MultipeerEventType.peerFound:
+            _handlePeerFound(event.peerId, event.peerName);
+            break;
+          case MultipeerEventType.peerLost:
+            _handlePeerLost(event.peerId);
+            break;
+          case MultipeerEventType.invitationReceived:
+            _handleInvitationReceived(
+              event.peerId,
+              event.peerName,
+              pairingCode: event.pairingCode,
+            );
+            break;
+          case MultipeerEventType.peerStateChanged:
+            if (event.state != null) {
+              _handlePeerStateChanged(event.peerId, event.state!);
+            }
+            break;
+          case MultipeerEventType.dataReceived:
+            if (event.data != null && event.data!.isNotEmpty) {
+              _handleDataReceived(event.peerId, event.data!);
+            }
+            break;
+        }
+      } catch (e, st) {
+        print('❌ 处理 Multipeer 事件失败 (${event.type}): $e');
+        print('$st');
       }
+    }, onError: (e, st) {
+      print('❌ Multipeer 事件流错误: $e');
+      print('$st');
     });
   }
 
@@ -425,25 +437,31 @@ class SyncService {
     await _multipeer.sendData(peerId, data);
   }
 
+  // 追踪本次同步中有新消息写入的 noteId，同步完成后统一修正 messageCount
+  final Set<String> _pendingRecalcNoteIds = {};
+
+  /// 接收 Note：只合并元数据（标题、类型），不覆盖 messageCount（由消息并集后重算决定）
   Future<void> _receiveNote(Map<String, dynamic> noteData) async {
     try {
-      final note = Note.fromJson(noteData);
-      
-      // 检查本地是否已有这个笔记
-      final localNotes = await _db.getAllNotes();
-      final existingNote = localNotes.where((n) => n.id == note.id).firstOrNull;
-      
-      if (existingNote == null) {
-        // 新笔记，直接创建
-        await _db.createNote(note);
-        print('✅ 新笔记已保存: ${note.title}');
+      final remote = Note.fromJson(noteData);
+      print('[同步-接收 Note] id=${remote.id} title="${remote.title}" updatedAt=${remote.updatedAt}');
+
+      final local = await _db.getNote(remote.id);
+      if (local == null) {
+        // 本地无此聊天对象，先建一个壳（消息后续单独合并）
+        await _db.createNote(remote.copyWith(messageCount: 0));
+        print('  → 新建聊天对象: ${remote.title}');
       } else {
-        // 处理冲突
-        if (note.updatedAt.isAfter(existingNote.updatedAt)) {
-          await _handleConflict(existingNote, note);
-          print('✅ 笔记已更新: ${note.title}');
+        // 只合并元数据（title / noteType / markdownContent），以较新 updatedAt 为准
+        if (remote.updatedAt.isAfter(local.updatedAt) || remote.title != local.title) {
+          await _db.updateNote(local.copyWith(
+            title: remote.title,
+            noteType: remote.noteType,
+            markdownContent: remote.markdownContent,
+          ));
+          print('  → 更新元数据: ${remote.title}');
         } else {
-          print('⏭️  本地笔记更新，跳过: ${note.title}');
+          print('  → 元数据无变化，跳过');
         }
       }
     } catch (e) {
@@ -451,19 +469,43 @@ class SyncService {
     }
   }
 
+  /// 接收 Message：按 id 取并集（已存在直接跳过），收完后由 _recalculatePendingNotes 修正 messageCount
   Future<void> _receiveMessage(Map<String, dynamic> messageData) async {
     try {
       final message = Message.fromJson(messageData);
-      await _db.createMessage(message);
-      print('✅ 新消息已保存');
+      final inserted = await _db.insertOrIgnoreMessage(message);
+      if (inserted) {
+        print('  → 新消息入库: id=${message.id} noteId=${message.noteId} content="${message.content}"');
+        _pendingRecalcNoteIds.add(message.noteId);
+      } else {
+        print('  → 消息已存在跳过: id=${message.id}');
+      }
     } catch (e) {
       print('❌ 接收消息失败: $e');
     }
   }
 
+  /// 对本次同步中有新消息写入的 note，重算 messageCount / lastMessagePreview
+  Future<void> _recalculatePendingNotes() async {
+    if (_pendingRecalcNoteIds.isEmpty) return;
+    for (final noteId in _pendingRecalcNoteIds) {
+      await _db.recalculateNoteStats(noteId);
+      print('✅ 重算 messageCount: noteId=$noteId');
+    }
+    _pendingRecalcNoteIds.clear();
+  }
+
   Future<void> _handleSyncRequest(String peerId) async {
-    print('📤 处理同步请求来自: $peerId');
-    await syncWithDevice(peerId);
+    print('📤 处理同步请求来自: $peerId（回传本机笔记，不再请求对方）');
+    await syncWithDevice(peerId, requestBack: false);
+  }
+
+  /// 向对方发送「请把你的笔记发给我」，实现双向同步
+  Future<void> _sendSyncRequest(String deviceId) async {
+    final payload = {'type': 'syncRequest'};
+    final data = Uint8List.fromList(utf8.encode(jsonEncode(payload)));
+    await _multipeer.sendData(deviceId, data);
+    print('📥 已请求对方回传笔记: $deviceId');
   }
 
   // 加载可信任设备列表
@@ -685,33 +727,76 @@ class SyncService {
     }
   }
 
-  // 与指定设备同步
-  Future<void> syncWithDevice(String deviceId) async {
+  /// 若未连接则先邀请并等待建立连接（最多 [timeout]），返回是否已连接。
+  Future<bool> _ensureConnection(String deviceId, {Duration timeout = const Duration(seconds: 20)}) async {
+    if (_multipeer.connectedPeers.containsKey(deviceId)) {
+      return true;
+    }
+    print('🔗 设备未连接，先发起邀请: $deviceId');
+    await inviteDevice(deviceId);
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (_multipeer.connectedPeers.containsKey(deviceId)) {
+        print('✅ 已连接: $deviceId');
+        return true;
+      }
+    }
+    print('⏱️ 等待连接超时: $deviceId');
+    return false;
+  }
+
+  // 与指定设备同步。[requestBack] 为 true 时会在发完后请求对方回传（双向）；对方响应时传 false 避免死循环。
+  Future<void> syncWithDevice(String deviceId, {bool requestBack = true}) async {
     _updateStatus(SyncStatus.syncing);
     _updateDeviceStatus(deviceId, SyncStatus.syncing, 0.0);
 
     try {
+      // 先确保已连接（发现≠连接，需先邀请对方）
+      final connected = await _ensureConnection(deviceId);
+      if (!connected) {
+        _updateDeviceStatus(deviceId, SyncStatus.error);
+        _updateStatus(SyncStatus.error);
+        print('❌ 无法连接设备，请确认对方也在 Sync Radar 页面并保持应用在前台');
+        return;
+      }
+
       // 获取本地所有笔记
       final localNotes = await _db.getAllNotes();
       
-      // 发送每个笔记
+      // 发送每个笔记 + 该笔记下的所有消息（这样列表的 messageCount 与点进去的消息条数一致）
+      int totalItems = 0;
+      for (final note in localNotes) {
+        final msgs = await _db.getMessagesForNote(note.id);
+        totalItems += 1 + msgs.length;
+      }
+      int sent = 0;
       for (int i = 0; i < localNotes.length; i++) {
         final note = localNotes[i];
-        final payload = {
-          'type': 'note',
-          'data': note.toJson(),
-        };
+        final noteJson = note.toJson();
+        await _multipeer.sendData(deviceId, utf8.encode(jsonEncode({'type': 'note', 'data': noteJson})));
+        print('[同步-发送] note id=${note.id} title="${note.title}" messageCount=${note.messageCount}');
         
-        final jsonStr = jsonEncode(payload);
-        final data = utf8.encode(jsonStr);
+        final messages = await _db.getMessagesForNote(note.id);
+        for (final message in messages) {
+          await _multipeer.sendData(deviceId, utf8.encode(jsonEncode({'type': 'message', 'data': message.toJson()})));
+          print('[同步-发送] message id=${message.id} noteId=${message.noteId} content="${message.content}"');
+        }
         
-        await _multipeer.sendData(deviceId, data);
-        
-        final progress = (i + 1) / localNotes.length;
-        _updateDeviceStatus(deviceId, SyncStatus.syncing, progress);
-        
-        await Future.delayed(const Duration(milliseconds: 100));
+        sent += 1 + messages.length;
+        _updateDeviceStatus(deviceId, SyncStatus.syncing, sent / totalItems);
+        await Future.delayed(const Duration(milliseconds: 50));
       }
+
+      // 仅主动发起同步时请求对方回传，实现双向同步；对方响应 syncRequest 时不再回传
+      if (requestBack) {
+        await _sendSyncRequest(deviceId);
+      }
+
+      // 本端数据发完后，等对方的数据回传并落库，再统一修正 messageCount
+      // 稍作延迟确保 _receiveMessage 回调已处理完（网络包顺序可能有延迟）
+      await Future.delayed(const Duration(milliseconds: 800));
+      await _recalculatePendingNotes();
 
       // 同步完成
       _updateDeviceStatus(deviceId, SyncStatus.completed, 1.0);
@@ -740,18 +825,17 @@ class SyncService {
     }
   }
 
-  // 与所有设备同步
+  // 与所有设备同步（对已发现的信任设备先连接再同步）
   Future<void> syncWithAllDevices() async {
-    final connectedDevices = _connectedDevices.where((d) => d.isConnected && isTrustedDevice(d.id)).toList();
-    
-    if (connectedDevices.isEmpty) {
-      print('⚠️ 没有已连接的可信任设备');
+    final trustedDiscovered = _connectedDevices.where((d) => isTrustedDevice(d.id)).toList();
+    if (trustedDiscovered.isEmpty) {
+      print('⚠️ 未发现已绑定的设备，请先点击「Scan Devices」并确保对方也在 Sync Radar 页面');
       return;
     }
 
     _updateStatus(SyncStatus.syncing);
 
-    for (final device in connectedDevices) {
+    for (final device in trustedDiscovered) {
       await syncWithDevice(device.id);
     }
 

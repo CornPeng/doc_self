@@ -35,13 +35,26 @@ class _NoteChatScreenState extends State<NoteChatScreen> {
     _loadMessages();
   }
 
+  /// 本页展示的数据：笔记来自 widget.note，消息来自 DB getMessagesForNote(note.id)
   Future<void> _loadMessages() async {
     setState(() => _isLoading = true);
+    print('loadMessages: ${widget.note.id}');
     final messages = await _db.getMessagesForNote(widget.note.id);
+    if (!mounted) return;
     setState(() {
       _messages = messages;
       _isLoading = false;
     });
+    // 打印当前页面的数据，便于对比是否与 DB/预期一致
+    final note = widget.note;
+    print('========== [聊天页-当前数据] ==========');
+    print('Note: id=${note.id} title="${note.title}" createdAt=${note.createdAt} updatedAt=${note.updatedAt} noteType=${note.noteType} messageCount=${note.messageCount}');
+    print('Messages(count=${messages.length}):');
+    for (int i = 0; i < messages.length; i++) {
+      final m = messages[i];
+      print('  [$i] id=${m.id} content="${m.content}" type=${m.type} createdAt=${m.createdAt} isSynced=${m.isSynced}');
+    }
+    print('======================================');
   }
 
   Future<void> _sendTextMessage() async {
