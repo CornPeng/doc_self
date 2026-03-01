@@ -482,7 +482,7 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
             letterSpacing: 0.2,
           ),
           decoration: InputDecoration(
-            hintText: '# Modern Markdown Editor\n\n开始编写你的内容...',
+            hintText: AppLocalizations.of(context)!.markdownEditorHint,
             hintStyle: TextStyle(
               color: Colors.white.withOpacity(0.3),
               fontFamily: 'monospace',
@@ -523,7 +523,7 @@ class _MarkdownEditorScreenState extends State<MarkdownEditorScreen>
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             data: _contentController.text.isEmpty
-                ? '# 预览\n\n在编辑器中输入 Markdown 内容，这里将显示预览效果。'
+                ? AppLocalizations.of(context)!.previewEmptyHint
                 : _contentController.text,
             styleSheet: MarkdownStyleSheet(
               blockSpacing: 8,

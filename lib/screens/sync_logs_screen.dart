@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/services/auto_sync_service.dart';
 
 class SyncLogsScreen extends StatefulWidget {
@@ -70,7 +71,7 @@ class _SyncLogsScreenState extends State<SyncLogsScreen> {
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Sync Logs'),
+        title: Text(AppLocalizations.of(context)!.syncLogs),
         backgroundColor: Colors.transparent,
       ),
       body: _logs.isEmpty

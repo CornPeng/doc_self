@@ -104,7 +104,7 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
             _multipeer.acceptInvitation();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('收到扫码配对请求，正在验证...'),
+                content: Text(AppLocalizations.of(context)!.qrPairingVerifying),
                 backgroundColor: const Color(0xFF3B82F6),
               ),
             );
@@ -391,12 +391,13 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
   }
 
   void _handleQrPayload(String raw) {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final map = jsonDecode(raw) as Map<String, dynamic>;
       if (map['app'] != 'SoulNote') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('二维码无效'),
+          SnackBar(
+            content: Text(l10n.invalidQr),
             backgroundColor: Color(0xFFEF4444),
           ),
         );
@@ -414,8 +415,8 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
       _tryAutoInviteFromQr();
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('二维码解析失败'),
+        SnackBar(
+          content: Text(l10n.qrParseFailed),
           backgroundColor: Color(0xFFEF4444),
         ),
       );
@@ -587,19 +588,20 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
   // 发送邀请
   Future<void> _sendInvitation(
       ConnectedDevice device, String pairingCode) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       _syncService.setPendingPairingCode(device.id, pairingCode);
       await _multipeer.invitePeer(device.id, pairingCode: pairingCode);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('正在向 ${device.name} 发送配对请求...'),
+          content: Text(l10n.sendingPairingRequest(device.name)),
           backgroundColor: const Color(0xFF3B82F6),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('发送邀请失败: $e'),
+          content: Text(l10n.inviteFailed('$e')),
           backgroundColor: const Color(0xFFEF4444),
         ),
       );
@@ -838,11 +840,11 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
     String peerName, {
     String? expectedCode,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     // 获取输入的PIN码
     final enteredPin = _pinControllers.map((c) => c.text).join();
 
     if (enteredPin.length != 4) {
-      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.enterFourDigitPassword),
@@ -857,8 +859,8 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
         expectedCode.isNotEmpty &&
         enteredPin != expectedCode) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('配对码不匹配，请重新输入'),
+        SnackBar(
+          content: Text(l10n.pairingCodeMismatch),
           backgroundColor: Color(0xFFEF4444),
         ),
       );
@@ -877,7 +879,7 @@ class _BluetoothBindingScreenState extends State<BluetoothBindingScreen> {
     await _sendPairingVerify(peerId, enteredPin);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('已发送配对码，等待 $peerName 确认'),
+        content: Text(l10n.waitingForConfirm(peerName)),
         backgroundColor: const Color(0xFF3B82F6),
       ),
     );

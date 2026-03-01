@@ -136,5 +136,72 @@
       }
     }
   },
-  "enterFourDigitPassword": "Please enter a 4-digit password"
+  "enterFourDigitPassword": "Please enter a 4-digit password",
+  "bluetoothSearch": "Bluetooth Search",
+  "bluetoothSearchDesc": "Manual search & pairing",
+  "sync": "Sync",
+  "syncDesc": "Sync with nearby devices",
+  "shareComingSoon": "Share feature coming soon...",
+  "captureThought": "Capture a thought...",
+  "markdownEditorHint": "# Modern Markdown Editor\n\nStart writing...",
+  "autoSyncRadar": "Auto Sync Radar",
+  "syncLogs": "Sync Logs",
+  "close": "Close",
+  "unlink": "Unlink",
+  "invalidQr": "Invalid QR code",
+  "qrParseFailed": "Failed to parse QR code",
+  "sendingPairingRequest": "Sending pairing request to {name}...",
+  "@sendingPairingRequest": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "inviteFailed": "Invite failed: {error}",
+  "@inviteFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "pairingCodeMismatch": "Pairing code mismatch, please re-enter",
+  "waitingForConfirm": "Pairing code sent, waiting for {name} to confirm",
+  "@waitingForConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "qrPairingVerifying": "QR pairing request received, verifying...",
+  "searchingDevice": "Searching for device: {name}...",
+  "@searchingDevice": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "searchTimeout": "Search timed out. Ensure the other device is on the binding page and has started search",
+  "connecting": "Connecting: {name}...",
+  "@connecting": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "connectTimeout": "Connection timed out. Ensure the other device is on the pairing page",
+  "connectFailed": "Connection failed: {error}",
+  "@connectFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "unboundDevice": "Unbound from {name}",
+  "@unboundDevice": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "previewEmptyHint": "Preview\n\nEnter Markdown in the editor to see preview here.",
+  "justNow": "Just now",
+  "minAgo": "{n} min ago",
+  "@minAgo": {"placeholders": {"n": {"type": "int"}}},
+  "hoursAgo": "{n} hours ago",
+  "@hoursAgo": {"placeholders": {"n": {"type": "int"}}},
+  "daysAgoShort": "{n} days ago",
+  "@daysAgoShort": {"placeholders": {"n": {"type": "int"}}}
 }

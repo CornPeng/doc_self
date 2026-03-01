@@ -272,4 +272,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterFourDigitPassword => 'Please enter a 4-digit password';
+
+  @override
+  String get bluetoothSearch => 'Bluetooth Search';
+
+  @override
+  String get bluetoothSearchDesc => 'Manual search & pairing';
+
+  @override
+  String get sync => 'Sync';
+
+  @override
+  String get syncDesc => 'Sync with nearby devices';
+
+  @override
+  String get shareComingSoon => 'Share feature coming soon...';
+
+  @override
+  String get captureThought => 'Capture a thought...';
+
+  @override
+  String get markdownEditorHint =>
+      '# Modern Markdown Editor\n\nStart writing...';
+
+  @override
+  String get autoSyncRadar => 'Auto Sync Radar';
+
+  @override
+  String get syncLogs => 'Sync Logs';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get unlink => 'Unlink';
+
+  @override
+  String get invalidQr => 'Invalid QR code';
+
+  @override
+  String get qrParseFailed => 'Failed to parse QR code';
+
+  @override
+  String sendingPairingRequest(String name) {
+    return 'Sending pairing request to $name...';
+  }
+
+  @override
+  String inviteFailed(String error) {
+    return 'Invite failed: $error';
+  }
+
+  @override
+  String get pairingCodeMismatch => 'Pairing code mismatch, please re-enter';
+
+  @override
+  String waitingForConfirm(String name) {
+    return 'Pairing code sent, waiting for $name to confirm';
+  }
+
+  @override
+  String get qrPairingVerifying => 'QR pairing request received, verifying...';
+
+  @override
+  String searchingDevice(String name) {
+    return 'Searching for device: $name...';
+  }
+
+  @override
+  String get searchTimeout =>
+      'Search timed out. Ensure the other device is on the binding page and has started search';
+
+  @override
+  String connecting(String name) {
+    return 'Connecting: $name...';
+  }
+
+  @override
+  String get connectTimeout =>
+      'Connection timed out. Ensure the other device is on the pairing page';
+
+  @override
+  String connectFailed(String error) {
+    return 'Connection failed: $error';
+  }
+
+  @override
+  String unboundDevice(String name) {
+    return 'Unbound from $name';
+  }
+
+  @override
+  String get previewEmptyHint =>
+      'Preview\n\nEnter Markdown in the editor to see preview here.';
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String minAgo(int n) {
+    return '$n min ago';
+  }
+
+  @override
+  String hoursAgo(int n) {
+    return '$n hours ago';
+  }
+
+  @override
+  String daysAgoShort(int n) {
+    return '$n days ago';
+  }
 }

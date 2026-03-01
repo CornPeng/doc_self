@@ -267,4 +267,111 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enterFourDigitPassword => '请输入 4 位数字密码';
+
+  @override
+  String get bluetoothSearch => '蓝牙搜索';
+
+  @override
+  String get bluetoothSearchDesc => '手动搜索与配对';
+
+  @override
+  String get sync => '同步';
+
+  @override
+  String get syncDesc => '与附近设备同步';
+
+  @override
+  String get shareComingSoon => '分享功能开发中...';
+
+  @override
+  String get captureThought => '记录一个想法...';
+
+  @override
+  String get markdownEditorHint => '# Markdown 编辑器\n\n开始编写内容...';
+
+  @override
+  String get autoSyncRadar => '自动同步雷达';
+
+  @override
+  String get syncLogs => '同步日志';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String get unlink => '解除';
+
+  @override
+  String get invalidQr => '二维码无效';
+
+  @override
+  String get qrParseFailed => '二维码解析失败';
+
+  @override
+  String sendingPairingRequest(String name) {
+    return '正在向 $name 发送配对请求...';
+  }
+
+  @override
+  String inviteFailed(String error) {
+    return '发送邀请失败: $error';
+  }
+
+  @override
+  String get pairingCodeMismatch => '配对码不匹配，请重新输入';
+
+  @override
+  String waitingForConfirm(String name) {
+    return '已发送配对码，等待 $name 确认';
+  }
+
+  @override
+  String get qrPairingVerifying => '收到扫码配对请求，正在验证...';
+
+  @override
+  String searchingDevice(String name) {
+    return '正在搜索设备: $name...';
+  }
+
+  @override
+  String get searchTimeout => '搜索超时，请确保对方也在绑定页面并已开始搜索';
+
+  @override
+  String connecting(String name) {
+    return '正在连接: $name...';
+  }
+
+  @override
+  String get connectTimeout => '连接超时，请确保对方设备也在配对页面';
+
+  @override
+  String connectFailed(String error) {
+    return '连接失败: $error';
+  }
+
+  @override
+  String unboundDevice(String name) {
+    return '已解除与 $name 的绑定';
+  }
+
+  @override
+  String get previewEmptyHint => '预览\n\n在编辑器中输入 Markdown 内容，这里将显示预览效果。';
+
+  @override
+  String get justNow => '刚刚';
+
+  @override
+  String minAgo(int n) {
+    return '$n 分钟前';
+  }
+
+  @override
+  String hoursAgo(int n) {
+    return '$n 小时前';
+  }
+
+  @override
+  String daysAgoShort(int n) {
+    return '$n 天前';
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/screens/sync_radar_screen.dart';
 
 class NoteStreamScreen extends StatefulWidget {
@@ -306,7 +307,7 @@ class _NoteStreamScreenState extends State<NoteStreamScreen> {
                       child: TextField(
                         controller: _messageController,
                         decoration: InputDecoration(
-                          hintText: 'Capture a thought...',
+                          hintText: AppLocalizations.of(context)!.captureThought,
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,

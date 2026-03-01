@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/services/sync_service.dart';
 import 'package:soul_note/services/auto_sync_service.dart';
 import 'package:soul_note/screens/sync_logs_screen.dart';
@@ -114,7 +115,7 @@ class _AutoSyncRadarScreenState extends State<AutoSyncRadarScreen>
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Auto Sync Radar'),
+        title: Text(AppLocalizations.of(context)!.autoSyncRadar),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(

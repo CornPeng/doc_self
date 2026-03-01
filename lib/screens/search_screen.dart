@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soul_note/l10n/app_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -96,6 +97,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   // Search Bar
                   Container(
                     height: 48,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: const Color(0xFF283039).withOpacity(0.7),
                       borderRadius: BorderRadius.circular(12),
@@ -104,26 +106,35 @@ class _SearchScreenState extends State<SearchScreen> {
                         width: 1,
                       ),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.only(left: 16, right: 12),
                           child: Icon(
                             Icons.search,
+                            size: 22,
                             color: Colors.white.withOpacity(0.6),
                           ),
                         ),
                         Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search your local notes...',
-                              border: InputBorder.none,
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.4),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextField(
+                              controller: _searchController,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                hintText: AppLocalizations.of(context)!.searchHint,
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                                hintStyle: TextStyle(
+                                  color: Colors.white.withOpacity(0.4),
+                                ),
                               ),
+                              style: const TextStyle(color: Colors.white),
                             ),
-                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ],

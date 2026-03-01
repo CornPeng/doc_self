@@ -90,7 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: _buildSettingItem(
               icon: Icons.storage,
               iconColor: Colors.green,
-              title: 'Storage Management',
+              title: l10n.storageManagement,
               subtitle: _storageSubtitle,
               onTap: _loadStorageStats,
             ),
@@ -115,8 +115,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingItem(
                   icon: Icons.bluetooth,
                   iconColor: const Color(0xFF3B82F6),
-                  title: 'Bluetooth Search',
-                  subtitle: 'Manual search & pairing',
+                  title: l10n.bluetoothSearch,
+                  subtitle: l10n.bluetoothSearchDesc,
                   trailing: Icon(
                     Icons.chevron_right,
                     color: Colors.white.withOpacity(0.4),
@@ -138,8 +138,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingItem(
                   icon: Icons.sync,
                   iconColor: const Color(0xFF137FEC),
-                  title: 'Sync',
-                  subtitle: 'Sync with nearby devices',
+                  title: l10n.sync,
+                  subtitle: l10n.syncDesc,
                   trailing: Icon(
                     Icons.chevron_right,
                     color: Colors.white.withOpacity(0.4),

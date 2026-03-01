@@ -583,6 +583,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter a 4-digit password'**
   String get enterFourDigitPassword;
+
+  /// No description provided for @bluetoothSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Search'**
+  String get bluetoothSearch;
+
+  /// No description provided for @bluetoothSearchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual search & pairing'**
+  String get bluetoothSearchDesc;
+
+  /// No description provided for @sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get sync;
+
+  /// No description provided for @syncDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync with nearby devices'**
+  String get syncDesc;
+
+  /// No description provided for @shareComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Share feature coming soon...'**
+  String get shareComingSoon;
+
+  /// No description provided for @captureThought.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture a thought...'**
+  String get captureThought;
+
+  /// No description provided for @markdownEditorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'# Modern Markdown Editor\n\nStart writing...'**
+  String get markdownEditorHint;
+
+  /// No description provided for @autoSyncRadar.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Sync Radar'**
+  String get autoSyncRadar;
+
+  /// No description provided for @syncLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Logs'**
+  String get syncLogs;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @unlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get unlink;
+
+  /// No description provided for @invalidQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid QR code'**
+  String get invalidQr;
+
+  /// No description provided for @qrParseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to parse QR code'**
+  String get qrParseFailed;
+
+  /// No description provided for @sendingPairingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending pairing request to {name}...'**
+  String sendingPairingRequest(String name);
+
+  /// No description provided for @inviteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite failed: {error}'**
+  String inviteFailed(String error);
+
+  /// No description provided for @pairingCodeMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing code mismatch, please re-enter'**
+  String get pairingCodeMismatch;
+
+  /// No description provided for @waitingForConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing code sent, waiting for {name} to confirm'**
+  String waitingForConfirm(String name);
+
+  /// No description provided for @qrPairingVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'QR pairing request received, verifying...'**
+  String get qrPairingVerifying;
+
+  /// No description provided for @searchingDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for device: {name}...'**
+  String searchingDevice(String name);
+
+  /// No description provided for @searchTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Search timed out. Ensure the other device is on the binding page and has started search'**
+  String get searchTimeout;
+
+  /// No description provided for @connecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting: {name}...'**
+  String connecting(String name);
+
+  /// No description provided for @connectTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection timed out. Ensure the other device is on the pairing page'**
+  String get connectTimeout;
+
+  /// No description provided for @connectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed: {error}'**
+  String connectFailed(String error);
+
+  /// No description provided for @unboundDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbound from {name}'**
+  String unboundDevice(String name);
+
+  /// No description provided for @previewEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview\n\nEnter Markdown in the editor to see preview here.'**
+  String get previewEmptyHint;
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @minAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min ago'**
+  String minAgo(int n);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} hours ago'**
+  String hoursAgo(int n);
+
+  /// No description provided for @daysAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days ago'**
+  String daysAgoShort(int n);
 }
 
 class _AppLocalizationsDelegate

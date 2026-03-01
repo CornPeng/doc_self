@@ -215,6 +215,7 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
   }
 
   Future<void> _unbindDevice(ConnectedDevice device) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -233,14 +234,14 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFFEF4444),
             ),
-            child: const Text('解除'),
+            child: Text(l10n.unlink),
           ),
         ],
       ),
@@ -252,7 +253,7 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('已解除与 ${device.name} 的绑定'),
+            content: Text(l10n.unboundDevice(device.name)),
             backgroundColor: const Color(0xFF3B82F6),
           ),
         );
@@ -372,6 +373,7 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
   }
 
   Future<void> _handleQrScanResult(String data) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final qrData = jsonDecode(data) as Map<String, dynamic>;
       // 兼容两种负载结构
@@ -405,7 +407,7 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('正在搜索设备: ${targetPeerName ?? targetPeerId}...'),
+            content: Text(l10n.searchingDevice(targetPeerName ?? targetPeerId)),
             backgroundColor: const Color(0xFF3B82F6),
             duration: const Duration(seconds: 3),
           ),
@@ -467,8 +469,8 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
         if (!invited && mounted) {
           print('⚠️ 超时未发现目标设备: $targetPeerName / $targetPeerId');
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('搜索超时，请确保对方也在绑定页面并已开始搜索'),
+            SnackBar(
+              content: Text(l10n.searchTimeout),
               backgroundColor: Color(0xFFFF9800),
             ),
           );
@@ -480,8 +482,8 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
       print('❌ 二维码解析失败: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('无效的二维码'),
+          SnackBar(
+            content: Text(l10n.invalidQr),
             backgroundColor: Color(0xFFEF4444),
           ),
         );
@@ -501,6 +503,7 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
       print('⏳ 正在连接中，跳过重复请求');
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     _isConnecting = true;
 
     try {
@@ -513,7 +516,7 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('正在连接: $_qrTargetDeviceName...'),
+                content: Text(l10n.connecting(_qrTargetDeviceName ?? '')),
             backgroundColor: const Color(0xFF3B82F6),
             duration: const Duration(seconds: 3),
           ),
@@ -530,8 +533,8 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
           print('⚠️ 连接超时');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('连接超时，请确保对方设备也在配对页面'),
+              SnackBar(
+                content: Text(l10n.connectTimeout),
                 backgroundColor: Color(0xFFFF9800),
                 duration: Duration(seconds: 3),
               ),
@@ -545,7 +548,7 @@ class _QrBluetoothBindingScreenState extends State<QrBluetoothBindingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('连接失败: $e'),
+            content: Text(l10n.connectFailed('$e')),
             backgroundColor: const Color(0xFFEF4444),
             duration: const Duration(seconds: 3),
           ),

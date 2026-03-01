@@ -355,7 +355,7 @@ class _NoteChatScreenState extends State<NoteChatScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('保存'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -405,8 +405,9 @@ class _NoteChatScreenState extends State<NoteChatScreen> {
 
   void _shareNote() {
     // TODO: 实现分享功能
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('分享功能开发中...')),
+      SnackBar(content: Text(l10n.shareComingSoon)),
     );
   }
 

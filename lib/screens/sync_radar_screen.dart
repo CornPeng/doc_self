@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soul_note/l10n/app_localizations.dart';
 import 'package:soul_note/services/sync_service.dart';
 
 class SyncRadarScreen extends StatefulWidget {
@@ -70,16 +71,17 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
     }
   }
 
-  String _getTimeAgo(DateTime time) {
+  String _getTimeAgo(BuildContext context, DateTime time) {
+    final l10n = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(time);
     if (diff.inSeconds < 60) {
-      return 'Just now';
+      return l10n.justNow;
     } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes} min ago';
+      return l10n.minAgo(diff.inMinutes);
     } else if (diff.inHours < 24) {
-      return '${diff.inHours} hours ago';
+      return l10n.hoursAgo(diff.inHours);
     } else {
-      return '${diff.inDays} days ago';
+      return l10n.daysAgoShort(diff.inDays);
     }
   }
 
@@ -95,7 +97,7 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Sync Radar'),
+        title: Text(AppLocalizations.of(context)!.syncRadar),
         backgroundColor: Colors.transparent,
       ),
       body: Column(
@@ -249,7 +251,7 @@ class _SyncRadarScreenState extends State<SyncRadarScreen>
                       title: displayDevices[i].name,
                       subtitle: displayDevices[i].status == SyncStatus.syncing
                           ? 'Syncing files... ${((displayDevices[i].progress ?? 0) * 100).toInt()}%'
-                          : 'Last synced: ${_getTimeAgo(displayDevices[i].lastSyncTime)}',
+                          : 'Last synced: ${_getTimeAgo(context, displayDevices[i].lastSyncTime)}',
                       subtitleColor: displayDevices[i].status == SyncStatus.syncing
                           ? const Color(0xFF137FEC)
                           : (DateTime.now().difference(displayDevices[i].lastSyncTime).inMinutes < 30
